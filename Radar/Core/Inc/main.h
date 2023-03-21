@@ -75,6 +75,7 @@ void Error_Handler(void);
 #define UNIT_SWITCH_GPIO_Port GPIOA
 #define IN1_Pin GPIO_PIN_10
 #define IN1_GPIO_Port GPIOA
+#define IN1_EXTI_IRQn EXTI4_15_IRQn
 #define SWDIO_Pin GPIO_PIN_13
 #define SWDIO_GPIO_Port GPIOA
 #define SWCLK_Pin GPIO_PIN_14
