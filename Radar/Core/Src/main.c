@@ -160,6 +160,88 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    // On vérifie qu'on a assez de valeurs pour effectuer les calculs
+	if (readyForCalculation == 1) {
+
+		// Calcul de la période moyenne
+		uint32_t sum = 0;
+		for (uint8_t i = 0; i < maxCounter; i++) {
+			sum += timerBuffer[i];
+		}
+		uint32_t average = sum / maxCounter;
+
+		// Si la période moyenne est non-nul, on peut faire les calculs suivants
+		if (average != 0) {
+			// Fréquence = 1 / Période moy (en s) = 1 / Période moy (en µs) * 1e-6
+			double frequency = 1.0 / (average * 1e-6);
+
+			// Si on remarque que la nouvelle vitesse mesurée est grande devant celle mesurée à
+			// l'itération précédente, on continue d'afficher la vitesse précédemment mesurée.
+			if (frequency / 19.49 <= 30 * measuredSpeed) {
+				measuredSpeed = frequency / 19.49;
+				usingLastValue = 1;
+				consecutiveSkips = 0;
+			} else {
+				consecutiveSkips += 1;
+				usingLastValue = 0;
+			}
+
+			// On initialise réinitialise la position du curseur
+			lcd16x2_setCursor(0, 0);
+
+			// Si on n'utilise pas la valeur mesurée lors de cette itération, on affiche
+			// une petite étoile dans le coin supérieur droit.
+			if (usingLastValue == 1) {
+				lcd16x2_printf("Vitesse:        ");
+			} else {
+				lcd16x2_printf("Vitesse:       *");
+			}
+
+			// Si le bouton est pressé, on convertit la vitesse en m/s
+			GPIO_PinState pinState = HAL_GPIO_ReadPin (DISPLAY_SWITCH_GPIO_Port, DISPLAY_SWITCH_Pin);
+			if (pinState == 0) {
+				// On convertit le nombre décimal en deux entiers pour l'affichage
+				speedIntegerPart = measuredSpeed / 3.6;
+				speedDecimalPart = (measuredSpeed / 3.6) * 1000 - 1000 * speedIntegerPart;
+				textBufferLength = sprintf(textBuffer, "     %.3lu.%.3lu m/s", speedIntegerPart, speedDecimalPart);
+			} else {
+				// On convertit le nombre décimal en deux entiers pour l'affichage
+				speedIntegerPart = measuredSpeed;
+				speedDecimalPart = measuredSpeed * 1000 - 1000 * speedIntegerPart;
+				textBufferLength = sprintf(textBuffer, "     %.2lu.%.3lu km/h", speedIntegerPart, speedDecimalPart);
+			}
+
+			// On affiche le résultat sur l'écran
+			lcd16x2_setCursor(1, 0);
+			lcd16x2_printf(textBuffer);
+		}
+
+		// Réinitialisation du tableau TimerBuffer
+		for (uint8_t i = 0; i < maxCounter; i++) {
+			timerBuffer[i] = 0;
+		}
+
+		// On indique qu'on n'est pas prêt pour la prochaine itération de l'affichage
+		readyForCalculation = 0;
+	} else {
+		// Si la moyenne est nulle, on continue d'afficher la dernière mesure pendant 2.5 secondes
+		// (sauf si celle-ci est supérieure à 100 km/h, notre radar n'étant en principe pas prévu
+		// pour des utilisations avec des vitesses aussi élevées, une telle vitesse serait sans doute
+		// liée à la présence de bruit dans le signal)
+		if (consecutiveSkips < 5 && measuredSpeed < 100) {
+			lcd16x2_setCursor(0, 0);
+			lcd16x2_printf("Derniere mesure:");
+			consecutiveSkips++;
+		} else {
+			lcd16x2_setCursor(0, 0);
+			lcd16x2_printf("                ");
+			lcd16x2_setCursor(1, 0);
+			lcd16x2_printf("Aucun signal !  ");
+		}
+	}
+
+	// On itère sur cette boucle toutes les 500ms
+	HAL_Delay(500);
   }
   /* USER CODE END 3 */
 }
