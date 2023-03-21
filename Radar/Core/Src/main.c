@@ -228,7 +228,7 @@ int main(void)
 		// (sauf si celle-ci est supérieure à 100 km/h, notre radar n'étant en principe pas prévu
 		// pour des utilisations avec des vitesses aussi élevées, une telle vitesse serait sans doute
 		// liée à la présence de bruit dans le signal)
-		if (consecutiveSkips < 5 && measuredSpeed < 100) {
+		if (consecutiveSkips > 2 && consecutiveSkips < 7 && measuredSpeed < 100) {
 			lcd16x2_setCursor(0, 0);
 			lcd16x2_printf("Derniere mesure:");
 			consecutiveSkips++;
@@ -374,6 +374,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(IN1_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 
 }
 
