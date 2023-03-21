@@ -198,7 +198,7 @@ int main(void)
 			}
 
 			// Si le bouton est pressé, on convertit la vitesse en m/s
-			GPIO_PinState pinState = HAL_GPIO_ReadPin (DISPLAY_SWITCH_GPIO_Port, DISPLAY_SWITCH_Pin);
+			GPIO_PinState pinState = HAL_GPIO_ReadPin (UNIT_SWITCH_GPIO_Port, UNIT_SWITCH_Pin);
 			if (pinState == 0) {
 				// On convertit le nombre décimal en deux entiers pour l'affichage
 				speedIntegerPart = measuredSpeed / 3.6;
