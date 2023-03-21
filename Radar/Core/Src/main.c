@@ -107,6 +107,7 @@ int main(void)
   double measuredSpeed = 10000.0;
   int usingLastValue = 0;
   int consecutiveSkips = 0;
+  int missedCalcs = 0;
   uint32_t speedIntegerPart = 0;
   uint32_t speedDecimalPart = 0;
   /* USER CODE END 1 */
@@ -162,6 +163,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     // On vérifie qu'on a assez de valeurs pour effectuer les calculs
 	if (readyForCalculation == 1) {
+		missedCalcs = 0;
 
 		// Calcul de la période moyenne
 		uint32_t sum = 0;
@@ -223,6 +225,7 @@ int main(void)
 
 		// On indique qu'on n'est pas prêt pour la prochaine itération de l'affichage
 		readyForCalculation = 0;
+		counter = 0;
 	} else {
 		// Si la moyenne est nulle, on continue d'afficher la dernière mesure pendant 2.5 secondes
 		// (sauf si celle-ci est supérieure à 100 km/h, notre radar n'étant en principe pas prévu
@@ -237,6 +240,29 @@ int main(void)
 			lcd16x2_printf("                ");
 			lcd16x2_setCursor(1, 0);
 			lcd16x2_printf("Aucun signal !  ");
+		}
+
+		missedCalcs++;
+		// Si on a loupé plus de 4 calculs (2s), on réinitialise toutes les valeurs précédemment mesurées
+		if (missedCalcs > 4) {
+			missedCalcs = 0;
+			// Réinitialisation du tableau TimerBuffer
+			for (uint8_t i = 0; i < maxCounter; i++) {
+				timerBuffer[i] = 0;
+			}
+
+			if (counter > 0) {
+				lcd16x2_setCursor(0, 15);
+				lcd16x2_printf(">");
+			}
+
+			// On indique qu'on n'est pas prêt pour la prochaine itération de l'affichage
+			readyForCalculation = 0;
+			counter = 0;
+
+			// DEBUG
+			//lcd16x2_setCursor(0, 15);
+			//lcd16x2_printf("R");
 		}
 	}
 
