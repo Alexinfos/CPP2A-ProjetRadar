@@ -106,7 +106,7 @@ int main(void)
   // Initialisation de certaines variables
   double measuredSpeed = 10000.0;
   int usingLastValue = 0;
-  int consecutiveSkips = 0;
+  int consecutiveSkips = 10;
   int missedCalcs = 0;
   uint32_t speedIntegerPart = 0;
   uint32_t speedDecimalPart = 0;
@@ -179,8 +179,14 @@ int main(void)
 
 			// Si on remarque que la nouvelle vitesse mesurée est grande devant celle mesurée à
 			// l'itération précédente, on continue d'afficher la vitesse précédemment mesurée.
-			if (frequency / 19.49 <= 30 * measuredSpeed) {
+			if (frequency / 19.49 <= 30 * measuredSpeed /*&& frequency / 19.49 <= 120*/) {
 				measuredSpeed = frequency / 19.49;
+
+				// If angle = 45°
+				//measuredSpeed = (frequency / (sqrt(2.0) * (10.525e9 / 3.0e8))) * 3.6;
+
+				// If angle = 30°
+				//measuredSpeed = (frequency / (sqrt(3.0) * (10.525e9 / 3.0e8))) * 3.6;
 				usingLastValue = 1;
 				consecutiveSkips = 0;
 			} else {
@@ -234,13 +240,15 @@ int main(void)
 		if (consecutiveSkips > 2 && consecutiveSkips < 7 && measuredSpeed < 100) {
 			lcd16x2_setCursor(0, 0);
 			lcd16x2_printf("Derniere mesure:");
-			consecutiveSkips++;
-		} else {
+
+		} else if (consecutiveSkips >= 7 || measuredSpeed >= 100) {
 			lcd16x2_setCursor(0, 0);
 			lcd16x2_printf("                ");
 			lcd16x2_setCursor(1, 0);
 			lcd16x2_printf("Aucun signal !  ");
 		}
+
+		consecutiveSkips++;
 
 		missedCalcs++;
 		// Si on a loupé plus de 4 calculs (2s), on réinitialise toutes les valeurs précédemment mesurées
