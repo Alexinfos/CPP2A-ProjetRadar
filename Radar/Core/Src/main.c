@@ -165,14 +165,14 @@ int main(void)
 	if (readyForCalculation == 1) {
 		missedCalcs = 0;
 
-		// Calcul de la période moyenne
+		// Calcul de la période moyenne (moyenne arithmétique)
 		uint32_t sum = 0;
 		for (uint8_t i = 0; i < maxCounter; i++) {
 			sum += timerBuffer[i];
 		}
 		uint32_t average = sum / maxCounter;
 
-		// Si la période moyenne est non-nul, on peut faire les calculs suivants
+		// Si la période moyenne est non-nulle, on peut faire les calculs suivants
 		if (average != 0) {
 			// Fréquence = 1 / Période moy (en s) = 1 / Période moy (en µs) * 1e-6
 			double frequency = 1.0 / (average * 1e-6);
@@ -187,6 +187,9 @@ int main(void)
 
 				// If angle = 30°
 				//measuredSpeed = (frequency / (sqrt(3.0) * (10.525e9 / 3.0e8))) * 3.6;
+
+				// If angle = 15°
+				//measuredSpeed = (frequency / (((sqrt(6.0) + sqrt(2.0)) / 2.0) * (10.525e9 / 3.0e8))) * 3.6;
 				usingLastValue = 1;
 				consecutiveSkips = 0;
 			} else {
