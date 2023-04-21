@@ -74,7 +74,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	// On récupère la valeur actuelle du timer
 	newTimerValue = __HAL_TIM_GET_COUNTER(&htim2);
 
-	// On vérifie que l'interrupt a bien été déclanché par le bon pin
+	// On vérifie que l'interrupt a bien été déclenché par le bon pin
 	if (GPIO_Pin == IN1_Pin) {
 		// On calcule l'intervalle de temps entre les deux derniers front montants
 		timerBuffer[counter] = newTimerValue - timerValue;
